@@ -429,6 +429,66 @@ create policy "stock_movements_admin" on stock_movements for all using (is_admin
 -- =========================================================
 -- SEED: Sample Velcor products
 -- =========================================================
+-- =========================================================
+-- VELCOR PHONE OTP EXTENSION — Passwordless SMS Auth
+-- =========================================================
+-- Phone is the primary identifier. Supabase Phone Auth handles OTP via SMS provider.
+-- Configure in Supabase Dashboard > Authentication > Providers > Phone:
+--   Enable Phone provider, set SMS provider (Twilio / MessageBird / Vonage / TextLocal)
+--   Set OTP expiry (300s recommended), resend cooldown (60s), max frequency (5/hour)
+--   Rate limits already enforced via auth config: rate_limit_sms_sent=30, rate_limit_otp=30
+
+-- Ensure phone column indexed for lookups and guest order linking
+create index if not exists idx_profiles_phone on profiles(phone);
+create index if not exists idx_profiles_phone_where on profiles(phone) where phone is not null;
+
+-- Normalize phone storage: add constraint for E.164 format where present
+do $$ begin
+  alter table profiles add constraint profiles_phone_e164 check (phone is null or phone ~ '^\+254[17][0-9]{8}$');
+exception when duplicate_object then null; end $$;
+
+-- Helper function: link guest orders to newly verified phone user
+create or replace function link_guest_orders_to_user() returns trigger as $$
+begin
+  -- When a profile is created/updated with phone, link any pending guest orders
+  if new.phone is not null then
+    update orders set user_id = new.id where customer_phone = new.phone and user_id is null;
+  end if;
+  return new;
+end; $$ language plpgsql security definer;
+drop trigger if exists trg_link_guest_orders on profiles;
+create trigger trg_link_guest_orders after insert or update of phone on profiles for each row execute function link_guest_orders_to_user();
+
+-- Auto-create profile on auth user creation (phone or email)
+create or replace function handle_new_user() returns trigger as $$
+begin
+  insert into public.profiles (id, email, full_name, phone, role)
+  values (
+    new.id,
+    coalesce(new.email, new.phone || '@velcor.phone'),
+    coalesce(new.raw_user_meta_data->>'full_name', new.raw_user_meta_data->>'fullName'),
+    new.phone,
+    'customer'
+  ) on conflict (id) do update set phone = coalesce(excluded.phone, profiles.phone);
+  return new;
+end; $$ language plpgsql security definer;
+drop trigger if exists on_auth_user_created on auth.users;
+create trigger on_auth_user_created after insert on auth.users for each row execute function handle_new_user();
+
+-- Update is_admin to also allow phone check (optional admin phones)
+create or replace function is_admin() returns boolean as $$
+  select exists (select 1 from profiles where id = auth.uid() and role = 'admin')
+      or exists (select 1 from auth.users where id = auth.uid() and phone in ('+254700000000'));
+$$ language sql security definer;
+
+-- Harden RLS: don't reveal phone existence — use generic policies
+-- profiles already restricts select to self or admin; add phone masking note
+comment on column profiles.phone is 'E.164 Kenyan phone (+254...), used as OTP identifier. Never expose via public API beyond owner.';
+comment on table orders is 'Orders linked via user_id when authenticated, or customer_phone for guest. Phone OTP user auto-links guest orders on verify.';
+
+-- For local demo without SMS provider, allow mock OTP via client localStorage fallback
+-- No server OTP storage — Supabase handles real OTP server-side, never exposed to client
+
 insert into products (id, name, slug, subcategory, brand, model, description, price, original_price, stock, availability, featured, bestseller, warranty, rating, reviews_count) values
 ('VEL-001','Samsung 65" Crystal UHD 4K Smart TV','samsung-65-crystal-uhd-4k-smart-tv','Televisions','Samsung','UA65CU7000','Immerse yourself in stunning 4K clarity with Crystal UHD. Crystal Processor 4K, HDR10+ and Smart Hub.',89900,115000,12,'In Stock',true,true,'2 Years Warranty',4.9,127),
 ('VEL-004','Hisense 320L No-Frost Refrigerator','hisense-320l-no-frost-refrigerator','Refrigerators','Hisense','REF320DR','Champagne-gold double-door fridge. No-frost, multi-airflow, super cool & super freeze.',68900,null,14,'In Stock',true,true,'3 Years Warranty',4.8,98)

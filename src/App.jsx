@@ -11,6 +11,7 @@ import OrderSuccess from './pages/OrderSuccess.jsx'
 import TrackOrder from './pages/TrackOrder.jsx'
 import Login from './pages/Login.jsx'
 import Register from './pages/Register.jsx'
+import PhoneAuth from './pages/PhoneAuth.jsx'
 import Account from './pages/Account.jsx'
 import About from './pages/About.jsx'
 import Contact from './pages/Contact.jsx'
@@ -32,7 +33,7 @@ function ProtectedAdmin({ children }) {
 function ProtectedUser({ children }) {
   const { user, loading } = useAuth()
   if (loading) return <div className="container" style={{padding:'80px 0', textAlign:'center'}}>Loading...</div>
-  if (!user) return <Navigate to="/login" replace />
+  if (!user) return <Navigate to="/auth" replace />
   return children
 }
 
@@ -52,6 +53,7 @@ export default function App() {
           <Route path="/track" element={<TrackOrder />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/auth" element={<PhoneAuth />} />
           <Route path="/account" element={<ProtectedUser><Account /></ProtectedUser>} />
           <Route path="/about" element={<About />} />
           <Route path="/contact" element={<Contact />} />

@@ -28,15 +28,26 @@ export default function Register() {
         <h1 style={{marginTop:12, fontSize:24}}>Create account</h1>
         <p style={{color:'var(--text-muted)', fontSize:13, marginTop:4}}>Join Velcor — save delivery info, track orders, faster checkout</p>
       </div>
-      <form onSubmit={submit} style={{marginTop:20, background:'var(--white)', border:'1px solid var(--border)', borderRadius:20, padding:20}}>
+
+      <div style={{marginTop:16, background:'linear-gradient(135deg, #1a1a1e 0%, #252529 100%)', borderRadius:16, padding:16, color:'white', display:'flex', gap:12, alignItems:'center', border:'1px solid rgba(201,168,106,0.2)'}}>
+        <span style={{width:40, height:40, borderRadius:12, background:'rgba(201,168,106,0.15)', border:'1px solid rgba(201,168,106,0.25)', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0, fontSize:18}}>✨</span>
+        <div style={{flex:1}}>
+          <div style={{fontWeight:800, fontSize:13, color:'#e8d5b5'}}>Recommended: Phone OTP</div>
+          <div style={{fontSize:11, color:'rgba(255,255,255,0.6)', marginTop:2}}>No password needed • Verified +254 • Instant</div>
+        </div>
+        <Link to="/auth" style={{padding:'10px 16px', borderRadius:999, background:'var(--champagne)', color:'var(--charcoal)', fontWeight:800, fontSize:12, whiteSpace:'nowrap'}}>Start →</Link>
+      </div>
+
+      <form onSubmit={submit} style={{marginTop:16, background:'var(--white)', border:'1px solid var(--border)', borderRadius:20, padding:20}}>
+        <div style={{fontSize:11, fontWeight:800, letterSpacing:'0.06em', color:'var(--text-muted)', textAlign:'center', marginBottom:12}}>— OR CREATE WITH EMAIL —</div>
         <label><span style={{fontSize:11, fontWeight:800, letterSpacing:'0.06em'}}>FULL NAME *</span><input value={form.fullName} onChange={e=>setForm({...form, fullName:e.target.value})} required placeholder="Waren Kyle" className="input" style={{marginTop:6, borderRadius:12}}/></label>
         <label style={{display:'block', marginTop:12}}><span style={{fontSize:11, fontWeight:800, letterSpacing:'0.06em'}}>EMAIL *</span><input value={form.email} onChange={e=>setForm({...form, email:e.target.value})} type="email" required placeholder="you@email.com" className="input" style={{marginTop:6, borderRadius:12}}/></label>
         <label style={{display:'block', marginTop:12}}><span style={{fontSize:11, fontWeight:800, letterSpacing:'0.06em'}}>PASSWORD *</span><input value={form.password} onChange={e=>setForm({...form, password:e.target.value})} type="password" required placeholder="Min 6 characters" className="input" style={{marginTop:6, borderRadius:12}}/></label>
         <label style={{display:'block', marginTop:12}}><span style={{fontSize:11, fontWeight:800, letterSpacing:'0.06em'}}>CONFIRM PASSWORD *</span><input value={form.confirm} onChange={e=>setForm({...form, confirm:e.target.value})} type="password" required placeholder="Confirm" className="input" style={{marginTop:6, borderRadius:12}}/></label>
         {error && <div style={{marginTop:12, background:'#fef2f2', border:'1px solid #fecaca', color:'#991b1b', padding:10, borderRadius:12, fontSize:12, fontWeight:700}}>{error}</div>}
         <button disabled={loading} className="btn-primary" style={{width:'100%', justifyContent:'center', marginTop:16}}>{loading ? 'Creating...' : 'Create Account'}</button>
-        <div style={{marginTop:12, textAlign:'center', fontSize:12, color:'var(--text-muted)'}}>Already have an account? <Link to="/login" style={{color:'var(--champagne-dark)', fontWeight:800}}>Sign in</Link></div>
-        <div style={{marginTop:12, fontSize:11, color:'var(--text-muted)', textAlign:'center'}}>By creating account you agree to Velcor Terms & Privacy.</div>
+        <div style={{marginTop:12, textAlign:'center', fontSize:12, color:'var(--text-muted)'}}>Already have an account? <Link to="/login" style={{color:'var(--champagne-dark)', fontWeight:800}}>Sign in</Link> • <Link to="/auth" style={{color:'var(--champagne-dark)', fontWeight:800}}>Use phone</Link></div>
+        <div style={{marginTop:12, fontSize:11, color:'var(--text-muted)', textAlign:'center'}}>By creating account you agree to Velcor Terms & Privacy. Phone OTP available at <Link to="/auth" style={{color:'var(--champagne-dark)'}}>/auth</Link>.</div>
       </form>
     </div>
   )
