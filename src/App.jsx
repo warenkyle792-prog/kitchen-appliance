@@ -12,6 +12,8 @@ import TrackOrder from './pages/TrackOrder.jsx'
 import Login from './pages/Login.jsx'
 import Register from './pages/Register.jsx'
 import Account from './pages/Account.jsx'
+import About from './pages/About.jsx'
+import Contact from './pages/Contact.jsx'
 import AdminLogin from './pages/AdminLogin.jsx'
 import AdminLayout from './components/admin/AdminLayout.jsx'
 import AdminDashboard from './pages/admin/Dashboard.jsx'
@@ -51,6 +53,8 @@ export default function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/account" element={<ProtectedUser><Account /></ProtectedUser>} />
+          <Route path="/about" element={<About />} />
+          <Route path="/contact" element={<Contact />} />
           <Route path="/admin/login" element={<AdminLogin />} />
           <Route path="/admin" element={<ProtectedAdmin><AdminLayout /></ProtectedAdmin>}>
             <Route index element={<AdminDashboard />} />
